@@ -27,7 +27,16 @@ const LoginPage = () => {
       toast.success('Welcome back!');
       navigate('/');
     } catch (err) {
-      const msg = err.response?.data?.error || 'Invalid login credentials';
+      let msg = err.response?.data?.error;
+      if (!msg) {
+        if (typeof err.response?.data === 'string' && err.response.data.includes('form')) {
+          msg = 'Backend not reached: Netlify is not connected to your local backend. Run frontend locally at http://localhost:5173 or set VITE_API_URL.';
+        } else if (err.message === 'Network Error' || err.code === 'ERR_NETWORK') {
+          msg = 'Network Error: Cannot reach backend server. Make sure your backend is running.';
+        } else {
+          msg = 'Invalid login credentials';
+        }
+      }
       toast.error(msg);
     } finally {
       setLoading(false);
@@ -41,7 +50,15 @@ const LoginPage = () => {
       toast.success(`Logged in as ${tier.toUpperCase()} demo user!`);
       navigate('/');
     } catch (err) {
-      toast.error('Demo login failed. Make sure backend is running.');
+      let msg = err.response?.data?.error;
+      if (!msg) {
+        if (typeof err.response?.data === 'string' && err.response.data.includes('form')) {
+          msg = 'Backend not reached: Netlify is not connected to your local backend. Run frontend locally at http://localhost:5173 or set VITE_API_URL.';
+        } else {
+          msg = 'Demo login failed. Make sure backend is running.';
+        }
+      }
+      toast.error(msg);
     } finally {
       setDemoLoading('');
     }
